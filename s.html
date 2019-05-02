@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: #323333;
+        }
+
+        .x {
+            width: 600px;
+            height: 400px;
+            position: relative;
+        }
+
+        canvas {
+            border-collapse: collapse;
+        }
+        
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 400px;
+            width: 600px;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 45px;
+            font-family: 'Arial';
+            display: none;
+        }
+
+        #button {
+            padding: 10px;
+            height: 200px;
+            border: none;
+            background-color: #1f98ff;
+            font-size: 25px;
+            border: 5px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+    
+    <div class="x">
+        <canvas id="cd"></canvas>
+        <div id="overlay"></div>
+    </div>
+    <input id="button" type="submit" onclick="reset()" value="Zagraj jeszcze raz">
+    <script>
+        var boxo = document.getElementById("overlay");
+        var animate = window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            window.oRequestAnimationFrame ||
+            function(callback) {
+                window.setTimeout(callback, 1000 / 60)
+            };
+
+        var canvas = document.getElementById("cd");
+        var ctx = canvas.getContext('2d');
+        canvas.height = 400;
+        canvas.width = 600;
+        var ch = canvas.height;
+        var cw = canvas.width;
+        var Ball = new ball(cw / 2, ch / 2, "#0d5304", 15, 5, 5);
+        var Player = new player();
+        var Computer = new computer();
+
+        var playerwynik = 0;
+        var botwynik = 0;
+
+        var reset = function() {
+            boxo.style.display = "none";
+            Ball = null;
+            Player = null;
+            Computer = null;
+            Ball = new ball(cw / 2, ch / 2, "#0d5304", 15, 5, 5);
+            Player = new player();
+            Computer = new computer();
+            playerwynik = 0;
+            botwynik = 0;
+        }
+
+        var h = playerwynik + " : ";
+        var draw = function() {
+            ctx.fillStyle = "#fc8ea1";
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.fillStyle = "white";
+            ctx.font = "30px Arial";
+            h = playerwynik + " : " + botwynik;
+            ctx.fillText(h, cw / 2 - 30, 50);
+            ctx.fillTe
+            Ball.render();
+            Player.render();
+            Computer.render();
+        }
+
+        var update = function() {
+            Ball.update();
+            Player.update();
+            Computer.update();
+            if (playerwynik == 11) {
+                boxo.style.display = "flex";
+                boxo.innerHTML = "Wygrales";
+                Ball.speedx = 0;
+                Ball.speedy = 0;
+            }
+            if (botwynik == 11) {
+                boxo.style.display = "flex";
+                boxo.innerHTML = "Przegrales";
+                Ball.speedx = 0;
+                Ball.speedy = 0;
+            }
+        }
+
+        var makeAll = function() {
+            update();
+            draw();
+            animate(makeAll);
+        }
+
+
+
+
+
+        function paddle(x, y, color, h, w) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.height = h;
+            this.width = w;
+            this.bottom = this.y - this.height;
+            this.middle = this.y - this.height / 2;
+        }
+
+        paddle.prototype.render = function() {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y - this.height / 2, this.width, this.height);
+        }
+
+        paddle.prototype.move = function(x, y) {
+            this.x += x;
+            this.y += y;
+        }
+
+
+
+
+        function ball(x, y, color, size, speedx, speedy) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.size = size;
+            this.speedx = speedx;
+            this.speedy = speedy;
+        }
+
+        ball.prototype.render = function() {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+        }
+
+        ball.prototype.update = function() {
+            if (this.y <= 0 || this.y + this.size >= ch) {
+                this.speedy = -this.speedy;
+            }
+            if (this.x <= 0) {
+                botwynik++;
+                this.y = ch / 2;
+                this.x = cw / 2;
+                this.speedx = -Math.floor((Math.random() * 6) + 3);
+                this.speedy = -Math.floor((Math.random() * 3) + 1);
+            }
+            if (this.x + this.size >= cw) {
+                this.y = ch / 2;
+                this.x = cw / 2;
+                this.speedx = -Math.floor((Math.random() * 6) + 3);
+                playerwynik++;
+            }
+
+            if (this.y >= Computer.paddle.y - Computer.paddle.height / 2 && this.y <= Computer.paddle.y + Computer.paddle.height / 2 && this.x + this.size >= Computer.paddle.x && this.x + this.size <= Computer.paddle.x + Computer.paddle.width) {
+
+                if (this.speedx < 20 && this.speedx > -20) {
+                    this.speedx += 0.6;
+                    if (this.speedy < 0) {
+                        this.speedy -= 0.2;
+                    } else {
+                        this.speedy += 0.2;
+                    }
+                }
+                this.speedx = -this.speedx;
+            }
+
+            if (this.y >= Player.paddle.y - Player.paddle.height / 2 && this.y <= Player.paddle.y + Player.paddle.height / 2 && this.x <= Player.paddle.x + Player.paddle.width && this.x >= Player.paddle.x) {
+                if (this.speedx < 9 && this.speedx > -9) {
+                    this.speedx -= 0.6;
+                    if (this.speedy < 0) {
+                        this.speedy -= 0.2;
+                    } else {
+                        this.speedy += 0.2;
+                    }
+                }
+                this.speedx = -this.speedx;
+            }
+
+            this.x += this.speedx;
+            this.y += this.speedy;
+        }
+
+        function player() {
+            this.paddle = new paddle(30, ch / 2, "midnightblue", 100, 10);
+        }
+
+        player.prototype.render = function() {
+            this.paddle.render();
+        }
+
+        player.prototype.update = function() {
+            if (hejka[38] == true) {
+                if (this.paddle.y - this.paddle.height / 2 <= 0) {
+                    this.paddle.move(0, -0);
+                } else {
+                    this.paddle.move(0, -7);
+                }
+            }
+            if (hejka[40] == true) {
+                if (this.paddle.y + this.paddle.height / 2 >= ch) {
+                    this.paddle.move(0, 0);
+                } else {
+                    this.paddle.move(0, 7);
+                }
+            }
+        }
+
+
+        function computer() {
+            this.paddle = new paddle(cw - 30 - 10, ch / 2, "#03719a", 100, 10);
+        }
+
+        computer.prototype.render = function() {
+            this.paddle.render();
+        }
+
+        computer.prototype.update = function() {
+            if (Ball.x >= cw / 2) {
+                if (Ball.y + Ball.size / 2 < this.paddle.y && Ball.y < this.paddle.y - this.paddle.height / 2) {
+                    if (this.paddle.y - this.paddle.height / 2 <= 0) {
+                        this.paddle.move(0, 0);
+                    } else {
+                        this.paddle.move(0, -4.5);
+                    }
+                }
+                if (Ball.y + Ball.size / 2 > this.paddle.y && Ball.y < this.paddle.y + this.paddle.height / 2) {
+                    if (this.paddle.y + this.paddle.height / 2 >= ch) {
+                        this.paddle.move(0, 0);
+                    } else {
+                        this.paddle.move(0, 4.5);
+                    }
+                }
+            } else {
+                if (Ball.y + Ball.size / 2 < this.paddle.y && Ball.y < this.paddle.y - this.paddle.height / 2) {
+                    if (this.paddle.y - this.paddle.height / 2 <= 0) {
+                        this.paddle.move(0, 0);
+                    } else {
+                        this.paddle.move(0, -2);
+                    }
+                }
+                if (Ball.y + Ball.size / 2 > this.paddle.y && Ball.y < this.paddle.y + this.paddle.height / 2) {
+                    if (this.paddle.y + this.paddle.height / 2 >= ch) {
+                        this.paddle.move(0, 0);
+                    } else {
+                        this.paddle.move(0, 2);
+                    }
+                }
+
+            }
+
+
+        }
+
+
+
+        animate(makeAll);
+
+
+
+
+
+
+
+        var hejka = [];
+        window.addEventListener("keydown", function(e) {
+            if (e.keyCode == 38) {
+                hejka[e.keyCode] = true;
+            }
+            if (e.keyCode == 40) {
+                hejka[e.keyCode] = true;
+            }
+        })
+
+        window.addEventListener("keyup", function(e) {
+            if (e.keyCode = 38) {
+                hejka[e.keyCode] = false;
+            }
+            if (e.keyCode == 40) {
+                hejka[e.keyCode] = false;
+            }
+        })
+    </script>
+</body>
+</html>

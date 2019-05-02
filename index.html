@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+   	<!--Konsola-->
+    <div id="console" style="display: none;"></div>
+    
+    <!--Raport-->
+    <div id="lay"></div>
+    <div id="rap"></div>
+    
+	<div class="col">
+        <div id="current"></div>
+        
+		<div id="zasoby" class="res">
+			<ol id="zas">
+			</ol>
+		</div>
+		<div class="ov">
+		    <canvas id="x"></canvas>
+		    <div id="menu">
+                <div class="resume" onclick="resume()" class="restart">Wznów grę</div>
+		        <div class="restart" onclick="restart()" class="restart">ZRESTARTUJ GRE</div>
+		    </div>
+		</div>
+		
+		
+		
+	</div>
+	<div class="col">
+
+		<div id="przyrost" class="res"></div>
+		<div id="dzien" class="res"></div>
+		<div id="wojsko" class="res"></div>
+		<div onclick="nextRound()" class="next">Następna tura</div>
+		
+	</div>
+	
+	<div class="col">
+		<div id="attack" class="res"></div>
+		<div id="raport" class="raport"></div>
+	</div>
+
+
+
+	<div style="display:none;">
+		<img id="grass" src="img/mapa.png">
+	</div>
+	
+	<script src="js/audio.js"></script>
+	<script src="js/event.js"></script>
+	<script src="js/unit.js"></script>
+	<script src="js/build.js"></script>
+	<script src="js/char.js"></script>
+	<script src="js/city.js"></script>
+	<script src="js/game.js"></script>
+	<script src="js/console.js"></script>
+
+</body>
+</html>
